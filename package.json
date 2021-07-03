@@ -1,0 +1,25 @@
+{
+  "name": "discordimagebot",
+  "version": "1.0.0",
+  "description": "Bot that gets local images from a system and can post them to text channels.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArturWagnerBusiness/DiscordImageBot.git"
+  },
+  "author": "Artur Wagner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ArturWagnerBusiness/DiscordImageBot/issues"
+  },
+  "homepage": "https://github.com/ArturWagnerBusiness/DiscordImageBot#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^16.0.0"
+  }
+}

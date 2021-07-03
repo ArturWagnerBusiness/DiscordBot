@@ -1,3 +1,14 @@
+# Discord token
+token.js
+
+# VSCode config
+.vscode
+
+# Compiled js files from ts
+config.js
+index.js
+util.js
+
 # Logs
 logs
 *.log
