@@ -10,6 +10,8 @@ index.js
 util.js
 
 # Logs
+donate.txt
+log.txt
 logs
 *.log
 npm-debug.log*

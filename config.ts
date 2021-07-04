@@ -1,7 +1,7 @@
 // Wait time in minutes
 export const admins = ["193313733471240192"];
 // Path to image folder
-let rootPath = "/home/artur/GoogleDrive/DriveSyncFiles";
+let rootPath = "/home/artur/GoogleDrive";
 // Folders for anime
 let animeFoldersRaw = [
   "Akashic Records",
@@ -14,6 +14,7 @@ let animeFoldersRaw = [
   "Genshin Impact",
   "Girls Frontline",
   "Hololive",
+  "Inuyama Tamaki",
   "Is the Order a Rabbit",
   "Kagura nana",
   "Kancolle",
@@ -62,7 +63,9 @@ const animeFolders = animeFoldersRaw.map(
 const lewdFolders = lewdFolderRaw.map(
   (folder) => `${rootPath}/Images/${folder}/`
 );
-const songFolders = songFoldersRaw.map((folder) => `${rootPath}/${folder}/`);
+const songFolders = songFoldersRaw.map(
+  (folder) => `${rootPath}/DriveSyncFiles/${folder}/`
+);
 
 export const memeImagePaths = (() => {
   let files: string[] = [];

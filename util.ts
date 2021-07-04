@@ -1,4 +1,5 @@
 import { admins } from "./config";
+import fs from "fs";
 var waitingAuthors: {
   [key: string]: {
     [key: string]: number;
@@ -74,4 +75,11 @@ export function getWaitTime(authorId: string, waitEvent: string) {
       (waitingAuthors[authorId][waitEvent] - Date.now()) / 1000
     )}s`;
   }
+}
+export function saveData(filename: string, data: string) {
+  fs.appendFile(filename, data + "\n", function (err) {
+    if (err) {
+      console.log(`Error happened in "${filename}" with data "${data}"`);
+    }
+  });
 }

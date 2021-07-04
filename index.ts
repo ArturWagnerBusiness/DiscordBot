@@ -6,7 +6,7 @@ import {
   songsPaths,
   admins,
 } from "./config";
-import { randomFile, checkUser, getWaitTime } from "./util";
+import { randomFile, checkUser, getWaitTime, saveData } from "./util";
 // One line token file grab.
 const token: string = require("./token.js");
 const startUpTime = Date.now();
@@ -22,28 +22,27 @@ client.on("message", async (message) => {
   const params = data.length > 0 ? [...data] : [];
   //! HELP COMMAND
   if (command === "?help") {
-    message.delete();
     message.channel.send(`**Possible Commands**
 \`\`\`markdown
 # Images
 ?meme   - Selects a random meme (7s cdr)
 ?anime  - Selects a random anime pic (7s cdr)
 ?lewd   - Has a different name, ?lewdXXXX (1h cdr)
+?donate - Send me a link of vid/png to add.
 Params: -png -gif -mp4
 E.g: ?meme -gif
 # Music (Only in Server)
 ?leave  - Leave vc
 ?join   - Join vc
 ?play   - Selects random song from lib
-# Info
+# Info+
 ?help   - This menu.
 ?stats  - News & stats.
-
+?tos    - Term of service
 TIP: I also answer commands in direct messages!
 \`\`\``);
     //! MEME COMMAND
   } else if (command === "?meme") {
-    message.delete();
     if (checkUser(message.author.id, 0.12, "meme")) {
       if (params.length > 0) {
         var file;
@@ -91,7 +90,6 @@ TIP: I also answer commands in direct messages!
     }
     //! ANIME COMMAND
   } else if (command === "?anime") {
-    message.delete();
     if (checkUser(message.author.id, 0.12, "anime")) {
       if (params.length > 0) {
         var file;
@@ -139,7 +137,9 @@ TIP: I also answer commands in direct messages!
     }
     //! LEWD COMMAND
   } else if (command === "?lewdpass") {
-    message.delete();
+    message.delete().catch(() => {
+      console.log("Cannot delete message in dm's (from ?lewdpass)");
+    });
     if (checkUser(message.author.id, 60, "lewd")) {
       let lewd = randomFile(lewdImagePaths, "all");
       if (admins.includes(message.author.id)) {
@@ -153,15 +153,21 @@ BY: ${message.author.username}
 FILE: ${lewd}
 ***********************\n`);
       }
+      saveData("log.txt", `${message.author.username}: ${lewd}`);
       if (lewd) {
-        message.channel.send("", {
-          files: [lewd],
+        message.author.send("By viewing the image you agree to TOS in ?tos", {
+          files: [
+            {
+              attachment: lewd,
+              name: "SPOILER_FILE.jpg",
+            },
+          ],
         });
       } else {
-        message.channel.send("`Could not find lewds`");
+        message.author.send("`Could not find lewds`");
       }
     } else {
-      message.channel.send(
+      message.author.send(
         `\`Your wait shall last ${getWaitTime(
           message.author.id,
           "lewd"
@@ -170,19 +176,20 @@ FILE: ${lewd}
     }
     //! STATS COMMAND
   } else if (command === "?stats") {
-    message.delete();
     let uptime = Math.floor((Date.now() - startUpTime) / 60000);
     message.channel.send(`**Current Stats**
 \`\`\`markdown
 Files:
-Meme  - ${memeImagePaths.length}
-Anime - ${animeImagePaths.length}
-Lewd  - ${lewdImagePaths.length}
-Total - ${
+Meme   - ${memeImagePaths.length}
+Anime  - ${animeImagePaths.length}
+Lewd   - ${lewdImagePaths.length}
+Total  - ${
       memeImagePaths.length + animeImagePaths.length + lewdImagePaths.length
     }
 
-Songs - ${songsPaths.length}
+Songs  - ${songsPaths.length}
+
+Admins - ${admins.length}
 
 Uptime: ${
       uptime > 60
@@ -194,23 +201,35 @@ Uptime: ${
 \`\`\``);
     //! JOIN COMMAND
   } else if (command === "?join") {
-    message.delete();
     if (message.member?.voice.channel) {
       connection = await message.member.voice.channel.join();
     }
     //! LEAVE COMMAND
   } else if (command === "?leave" && connection) {
-    message.delete();
     connection.disconnect();
+    connection = undefined;
     client.user?.setActivity();
     //! PLAY COMMAND
   } else if (
     (command === "?play" && connection) ||
     (command === "?skip" && connection)
   ) {
-    message.delete();
     playRandomSong();
-    //! ? UNKNOWN
+    //! DONATE COMMAND
+  } else if (command === "?donate" && params.length > 0) {
+    let out = "";
+    params.forEach((param) => {
+      out += param + " ";
+    });
+    saveData("donate.txt", out);
+  } else if (command === "?tos") {
+    message.author.send(`**Term of Service**
+\`\`\`markdown
+By using the bot you agree that your soul in my.
+Any data provided to you by the bot is by no means connected to the bot owner.
+Please keep in mind that the bot owner is not responsible for any damage caused.
+You are free to use the bot otherwise.
+\`\`\``);
   }
 });
 
