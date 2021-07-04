@@ -1,7 +1,7 @@
 // Wait time in minutes
 export const admins = ["193313733471240192"];
 // Path to image folder
-let rootPath = "/home/artur/GoogleDrive/DriveSyncFiles/Images";
+let rootPath = "/home/artur/GoogleDrive/DriveSyncFiles";
 // Folders for anime
 let animeFoldersRaw = [
   "Akashic Records",
@@ -34,19 +34,36 @@ let animeFoldersRaw = [
 let memeFoldersRaw = ["_Meme"];
 // Folders for lewds
 let lewdFolderRaw = ["Ecchi", "Ecchi Real"];
-
+// Folders for songs
+let songFoldersRaw = [
+  "Music",
+  "Music/FFF",
+  "Music/old",
+  "Music/old 2",
+  "Music/old 3",
+  "Music/old 4",
+  "Music/Kairiki Bear Encore Album Venomer",
+  "Music/Takamachi Walk - Permanence",
+  "Music/Yunosuke",
+  "Music/かいりきベア",
+];
 /*
-    End of Config
+!    End of Config
 */
 
 import fs from "fs";
 
-function constructPath(name: string) {
-  return `${rootPath}/${name}/`;
-}
-const memeFolders = memeFoldersRaw.map((folder) => constructPath(folder));
-const animeFolders = animeFoldersRaw.map((folder) => constructPath(folder));
-const lewdFolders = lewdFolderRaw.map((folder) => constructPath(folder));
+const memeFolders = memeFoldersRaw.map(
+  (folder) => `${rootPath}/Images/${folder}/`
+);
+const animeFolders = animeFoldersRaw.map(
+  (folder) => `${rootPath}/Images/${folder}/`
+);
+const lewdFolders = lewdFolderRaw.map(
+  (folder) => `${rootPath}/Images/${folder}/`
+);
+const songFolders = songFoldersRaw.map((folder) => `${rootPath}/${folder}/`);
+
 export const memeImagePaths = (() => {
   let files: string[] = [];
   memeFolders.forEach((folder) => {
@@ -71,6 +88,18 @@ export const lewdImagePaths = (() => {
   lewdFolders.forEach((folder) => {
     fs.readdirSync(folder).forEach((file) => {
       files.push(folder + file);
+    });
+  });
+  return files;
+})();
+
+export const songsPaths = (() => {
+  let files: string[] = [];
+  songFolders.forEach((folder) => {
+    fs.readdirSync(folder).forEach((file) => {
+      if (file.includes(".mp3")) {
+        files.push(folder + file);
+      }
     });
   });
   return files;

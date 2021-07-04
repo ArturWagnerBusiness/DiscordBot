@@ -5,8 +5,40 @@ var waitingAuthors: {
   };
 } = {};
 
-export function randomFile(array: string[]) {
-  return array[Math.floor(Math.random() * array.length)];
+export function randomFile(
+  array: string[],
+  type: "png" | "gif" | "mp4" | "all"
+) {
+  if (type === "all") return array[Math.floor(Math.random() * array.length)];
+
+  var checkExtension = ["/"];
+  switch (type) {
+    case "png":
+      checkExtension = ["png", "jpg", "jpeg"];
+      break;
+    case "gif":
+      checkExtension = ["gif"];
+      break;
+    case "mp4":
+      checkExtension = ["mov", "mp4", "avi"];
+      break;
+  }
+  let newArray = array
+    .map((file) => {
+      let extension = file.split(".").pop();
+      if (!extension) {
+        return;
+      }
+      if (!checkExtension.includes(extension)) {
+        return;
+      }
+      return file;
+    })
+    .filter(function (item) {
+      return typeof item === "string";
+    });
+  let file = newArray[Math.floor(Math.random() * newArray.length)];
+  return file ? file : undefined;
 }
 export function checkUser(
   authorId: string,
