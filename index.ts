@@ -14,10 +14,9 @@ const client = new Client();
 var connection: VoiceConnection | undefined;
 var currentSongName = "";
 
-client.user?.setActivity(`?help`, { type: "WATCHING" });
-
 client.on("ready", () => {
   console.log(`\nLogged in as ${client.user?.tag}!\n`);
+  client.user?.setActivity(`?help`, { type: "WATCHING" });
 });
 
 client.on("message", async (message) => {
