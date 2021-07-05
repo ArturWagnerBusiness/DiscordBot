@@ -12,6 +12,10 @@ const token: string = require("./token.js");
 const startUpTime = Date.now();
 const client = new Client();
 var connection: VoiceConnection | undefined;
+var currentSongName = "";
+
+client.user?.setActivity(`?help`, { type: "WATCHING" });
+
 client.on("ready", () => {
   console.log(`\nLogged in as ${client.user?.tag}!\n`);
 });
@@ -25,20 +29,23 @@ client.on("message", async (message) => {
     message.channel.send(`**Possible Commands**
 \`\`\`markdown
 # Images
-?meme   - Selects a random meme (7s cdr)
-?anime  - Selects a random anime pic (7s cdr)
-?lewd   - Has a different name, ?lewdXXXX (1h cdr)
-?donate - Send me a link of vid/png to add.
+?meme      - Selects a random meme (7s cdr).
+?anime     - Selects a random anime pic (7s cdr).
+?lewd      - Selects a random lewd (1h cdr).
+?donate    - Send me a link of vid/png to add.
 Params: -png -gif -mp4
 E.g: ?meme -gif
 # Music (Only in Server)
-?leave  - Leave vc
-?join   - Join vc
-?play   - Selects random song from lib
-# Info+
-?help   - This menu.
-?stats  - News & stats.
-?tos    - Term of service
+?leave     - Leave vc.
+?join      - Join vc.
+?play      - Selects random song from lib.
+?skip      - Play next random song.
+?song-name - Get current song name.
+?song-db   - Get a link to the song folder.
+# Info
+?help      - This menu.
+?stats     - News & stats.
+?tos       - Term of service.
 TIP: I also answer commands in direct messages!
 \`\`\``);
     //! MEME COMMAND
@@ -82,10 +89,10 @@ TIP: I also answer commands in direct messages!
       }
     } else {
       message.channel.send(
-        `\`You need to wait ${getWaitTime(
+        `You need to wait ${getWaitTime(
           message.author.id,
           "meme"
-        )} before getting a new meme.\``
+        )} before getting a new meme.`
       );
     }
     //! ANIME COMMAND
@@ -111,11 +118,11 @@ TIP: I also answer commands in direct messages!
             })
             .catch(() => {
               message.channel.send(
-                "`Error: Was unable to send a file. Please try again.`"
+                `Error: Was unable to send a file. Please try again.`
               );
             });
         } else {
-          message.channel.send(`\`No anime pic found with "${params[0]}"\``);
+          message.channel.send(`No anime pic found with "${params[0]}"`);
         }
       } else {
         let file = randomFile(animeImagePaths, "all");
@@ -129,10 +136,10 @@ TIP: I also answer commands in direct messages!
       }
     } else {
       message.channel.send(
-        `\`You need to wait ${getWaitTime(
+        `You need to wait ${getWaitTime(
           message.author.id,
           "anime"
-        )} before getting a new anime pic.\``
+        )} before getting a new anime pic.`
       );
     }
     //! LEWD COMMAND
@@ -153,13 +160,13 @@ BY: ${message.author.username}
 FILE: ${lewd}
 ***********************\n`);
       }
-      saveData("log.txt", `${message.author.username}: ${lewd}`);
+      saveData("log.txt", `LEWD ${message.author.username}: ${lewd}`);
       if (lewd) {
         message.author.send("By viewing the image you agree to TOS in ?tos", {
           files: [
             {
               attachment: lewd,
-              name: "SPOILER_FILE.jpg",
+              name: `SPOILER_FILE.${lewd.split(".").pop()}`,
             },
           ],
         });
@@ -168,10 +175,10 @@ FILE: ${lewd}
       }
     } else {
       message.author.send(
-        `\`Your wait shall last ${getWaitTime(
+        `Your wait shall last ${getWaitTime(
           message.author.id,
           "lewd"
-        )} before you can obtain more lewd.\``
+        )} before you can obtain more lewd.`
       );
     }
     //! STATS COMMAND
@@ -208,7 +215,7 @@ Uptime: ${
   } else if (command === "?leave" && connection) {
     connection.disconnect();
     connection = undefined;
-    client.user?.setActivity();
+    currentSongName = "";
     //! PLAY COMMAND
   } else if (
     (command === "?play" && connection) ||
@@ -221,7 +228,9 @@ Uptime: ${
     params.forEach((param) => {
       out += param + " ";
     });
-    saveData("donate.txt", out);
+    message.author.send(`Donation saved! Thank you!`);
+    saveData("donate.txt", `${message.author.username}: ${out}`);
+    //! TOS COMMAND
   } else if (command === "?tos") {
     message.author.send(`**Term of Service**
 \`\`\`markdown
@@ -230,6 +239,16 @@ Any data provided to you by the bot is by no means connected to the bot owner.
 Please keep in mind that the bot owner is not responsible for any damage caused.
 You are free to use the bot otherwise.
 \`\`\``);
+    saveData("log.txt", `TOS READ ${message.author.username}`);
+    //! SONG-NAME COMMAND
+  } else if (command === "?song-name" && connection && currentSongName) {
+    message.channel.send(`Current song playing is ${currentSongName}`);
+    //! SONG-DATABASE COMMAND
+  } else if (command === "?song-db") {
+    message.author.send(
+      `Here is the link, you agree to ?tos by using the link. ||https://drive.google.com/drive/folders/1mPSTX-7uEi0bGyW8PUa1g7uFRFMtKWIc?usp=sharing||`
+    );
+    saveData("log.txt", `SONG-DB request ${message.author.username}`);
   }
 });
 
@@ -237,17 +256,13 @@ function playRandomSong() {
   if (!connection) return;
   let file = randomFile(songsPaths, "all");
   if (!file) return;
-  let dispatcher = connection.play(file, { volume: 0.5 });
+  let dispatcher = connection.play(file, { volume: 0.35 });
   dispatcher.on("start", () => {
-    console.log(`${file} is now playing!`);
     let fileName = file?.split("/").pop()?.replace(".mp3", "");
-    client.user?.setActivity(`${fileName}`, {
-      type: "LISTENING",
-    });
+    currentSongName = fileName ? fileName : "";
   });
   dispatcher.on("finish", () => {
-    console.log(`${file} has finished playing!`);
-    client.user?.setActivity();
+    currentSongName = "";
     playRandomSong();
   });
   dispatcher.on("error", console.error);
