@@ -5,8 +5,18 @@ import {
   lewdImagePaths,
   songsPaths,
   admins,
+  animeImageRootFolder,
+  memeImageRootFolder,
+  lewdImageRootFolder,
+  songsRootFolder,
 } from "./config";
-import { randomFile, checkUser, getWaitTime, saveData } from "./util";
+import {
+  randomFile,
+  checkUser,
+  getWaitTime,
+  saveData,
+  generatePath,
+} from "./util";
 // One line token file grab.
 const token: string = require("./token.js");
 const startUpTime = Date.now();
@@ -46,10 +56,11 @@ E.g: ?meme -gif
 ?stats     - News & stats.
 ?tos       - Term of service.
 TIP: I also answer commands in direct messages!
+Source Code: https://github.com/ArturWagnerBusiness/DiscordBot
 \`\`\``);
     //! MEME COMMAND
   } else if (command === "?meme") {
-    if (checkUser(message.author.id, 0.12, "meme")) {
+    if (checkUser(message.author.id, 0, "meme")) {
       if (params.length > 0) {
         var file;
         switch (params[0]) {
@@ -65,7 +76,7 @@ TIP: I also answer commands in direct messages!
         }
         if (file) {
           message.channel
-            .send("", {
+            .send("Source: " + generatePath(file, memeImageRootFolder), {
               files: [file],
             })
             .catch(() => {
@@ -79,9 +90,12 @@ TIP: I also answer commands in direct messages!
       } else {
         let file = randomFile(memeImagePaths, "all");
         if (file) {
-          message.channel.send("", {
-            files: [file],
-          });
+          message.channel.send(
+            "Source: " + generatePath(file, memeImageRootFolder),
+            {
+              files: [file],
+            }
+          );
         } else {
           message.channel.send("`Could not find meme`");
         }
@@ -96,7 +110,7 @@ TIP: I also answer commands in direct messages!
     }
     //! ANIME COMMAND
   } else if (command === "?anime") {
-    if (checkUser(message.author.id, 0.12, "anime")) {
+    if (checkUser(message.author.id, 0, "anime")) {
       if (params.length > 0) {
         var file;
         switch (params[0]) {
@@ -112,7 +126,7 @@ TIP: I also answer commands in direct messages!
         }
         if (file) {
           message.channel
-            .send("", {
+            .send("Source: " + generatePath(file, animeImageRootFolder), {
               files: [file],
             })
             .catch(() => {
@@ -126,9 +140,12 @@ TIP: I also answer commands in direct messages!
       } else {
         let file = randomFile(animeImagePaths, "all");
         if (file) {
-          message.channel.send("", {
-            files: [file],
-          });
+          message.channel.send(
+            "Source: " + generatePath(file, animeImageRootFolder),
+            {
+              files: [file],
+            }
+          );
         } else {
           message.channel.send("`Could not find anime pic`");
         }
@@ -142,11 +159,11 @@ TIP: I also answer commands in direct messages!
       );
     }
     //! LEWD COMMAND
-  } else if (command === "?lewdpass") {
+  } else if (command === "?lewd") {
     message.delete().catch(() => {
       console.log("Cannot delete message in dm's (from ?lewdpass)");
     });
-    if (checkUser(message.author.id, 60, "lewd")) {
+    if (checkUser(message.author.id, 30, "lewd")) {
       let lewd = randomFile(lewdImagePaths, "all");
       if (admins.includes(message.author.id)) {
         console.log(`Lewd read,
@@ -161,14 +178,19 @@ FILE: ${lewd}
       }
       saveData("log.txt", `LEWD ${message.author.username}: ${lewd}`);
       if (lewd) {
-        message.author.send("By viewing the image you agree to TOS in ?tos", {
-          files: [
-            {
-              attachment: lewd,
-              name: `SPOILER_FILE.${lewd.split(".").pop()}`,
-            },
-          ],
-        });
+        message.author.send(
+          "By viewing the image you agree to TOS in ?tos\nSource: ||" +
+            generatePath(lewd, lewdImageRootFolder) +
+            "||",
+          {
+            files: [
+              {
+                attachment: lewd,
+                name: `SPOILER_FILE.${lewd.split(".").pop()}`,
+              },
+            ],
+          }
+        );
       } else {
         message.author.send("`Could not find lewds`");
       }
@@ -241,7 +263,12 @@ You are free to use the bot otherwise.
     saveData("log.txt", `TOS READ ${message.author.username}`);
     //! SONG-NAME COMMAND
   } else if (command === "?song-name" && connection && currentSongName) {
-    message.channel.send(`Current song playing is ${currentSongName}`);
+    message.channel.send(
+      `Current song playing is ${generatePath(
+        currentSongName,
+        songsRootFolder
+      )}`
+    );
     //! SONG-DATABASE COMMAND
   } else if (command === "?song-db") {
     message.author.send(
@@ -255,10 +282,9 @@ function playRandomSong() {
   if (!connection) return;
   let file = randomFile(songsPaths, "all");
   if (!file) return;
-  let dispatcher = connection.play(file, { volume: 0.35 });
+  let dispatcher = connection.play(file, { volume: 0.4 });
   dispatcher.on("start", () => {
-    let fileName = file?.split("/").pop()?.replace(".mp3", "");
-    currentSongName = fileName ? fileName : "";
+    currentSongName = file ? file : "";
   });
   dispatcher.on("finish", () => {
     currentSongName = "";

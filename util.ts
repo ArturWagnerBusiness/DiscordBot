@@ -5,7 +5,20 @@ var waitingAuthors: {
     [key: string]: number;
   };
 } = {};
-
+export function generatePath(pathRaw: string, root: string) {
+  let path = pathRaw.split("/").reverse();
+  let out = "";
+  let stop = false;
+  path.forEach((element) => {
+    if (stop) return;
+    if (element === root) {
+      stop = true;
+      return;
+    }
+    out = "/" + element + out;
+  });
+  return out;
+}
 export function randomFile(
   array: string[],
   type: "png" | "gif" | "mp4" | "all"
