@@ -1,4 +1,4 @@
-import { Client, VoiceConnection } from "discord.js";
+import { Client, VoiceConnection, MessageEmbed } from "discord.js";
 import {
   animeImagePaths,
   memeImagePaths,
@@ -35,29 +35,33 @@ client.on("message", async (message) => {
   const params = data.length > 0 ? [...data] : [];
   //! HELP COMMAND
   if (command === "?help") {
-    message.channel.send(`**Possible Commands**
-\`\`\`markdown
-# Images
-?meme      - Selects a random meme (7s cdr).
-?anime     - Selects a random anime pic (7s cdr).
-?lewd      - Selects a random lewd (1h cdr).
-?donate    - Send me a link of vid/png to add.
-Params: -png -gif -mp4
-E.g: ?meme -gif
-# Music (Only in Server)
-?leave     - Leave vc.
-?join      - Join vc.
-?play      - Selects random song from lib.
-?skip      - Play next random song.
-?song-name - Get current song name.
-?song-db   - Get a link to the song folder.
-# Info
-?help      - This menu.
-?stats     - News & stats.
-?tos       - Term of service.
-TIP: I also answer commands in direct messages!
-Source Code: https://github.com/ArturWagnerBusiness/DiscordBot
-\`\`\``);
+    let exampleEmbed = new MessageEmbed()
+      .setColor("#0099ff")
+      .setTitle("Possible Commands")
+      .setDescription(
+        "Bot is capable of image sending and music playing. Please remember that you can donate links to songs and images using ?donate <link>"
+      )
+      .setAuthor(
+        "Source code",
+        undefined,
+        "https://github.com/ArturWagnerBusiness/DiscordBot"
+      )
+      .addField(
+        "Image commands",
+        "?meme - Selects a random meme (7s cdr).\n?anime - Selects a random anime (7s cdr).\n?lewd - Selects a random lewd (1h cdr).\n*Params: -png -gif -mp4*\n*E.g: ?meme -gif*",
+        true
+      )
+      .addField(
+        "Music commands (Only in Server)",
+        "?leave - Leave vc.\n?join - Join vc.\n?play - Selects random song from lib.\n?skip - Play next random song.\n?song-name - Get current song name.\n?song-db - Get a link to the song folder.",
+        true
+      )
+      .addField(
+        "Info commands",
+        "?help - This menu.\n?stats - News & stats.\n?tos - Term of service.\n?donate - Send me a link of vid/png to add."
+      )
+      .setFooter("TIP: I also answer commands in direct messages!");
+    message.channel.send(exampleEmbed);
     //! MEME COMMAND
   } else if (command === "?meme") {
     if (checkUser(message.author.id, 0, "meme")) {
@@ -205,28 +209,38 @@ FILE: ${lewd}
     //! STATS COMMAND
   } else if (command === "?stats") {
     let uptime = Math.floor((Date.now() - startUpTime) / 60000);
-    message.channel.send(`**Current Stats**
-\`\`\`markdown
-Files:
-Meme   - ${memeImagePaths.length}
+    let exampleEmbed = new MessageEmbed()
+      .setColor("#0099ff")
+      .setTitle("Bot Status")
+      .setDescription(
+        `Bot has been running for "${
+          uptime > 60
+            ? `${Math.floor(uptime / 60)} hour${
+                Math.floor(uptime / 60) > 1 ? "s" : ""
+              }`
+            : `${uptime} minute${uptime > 1 ? "s" : ""}`
+        }"`
+      )
+      .setAuthor(
+        "Source code",
+        undefined,
+        "https://github.com/ArturWagnerBusiness/DiscordBot"
+      )
+      .addField(
+        "Images",
+        `Meme   - ${memeImagePaths.length}
 Anime  - ${animeImagePaths.length}
 Lewd   - ${lewdImagePaths.length}
 Total  - ${
-      memeImagePaths.length + animeImagePaths.length + lewdImagePaths.length
-    }
-
-Songs  - ${songsPaths.length}
-
-Admins - ${admins.length}
-
-Uptime: ${
-      uptime > 60
-        ? `${Math.floor(uptime / 60)} hour${
-            Math.floor(uptime / 60) > 1 ? "s" : ""
-          }`
-        : `${uptime} minute${uptime > 1 ? "s" : ""}`
-    } 
-\`\`\``);
+          memeImagePaths.length + animeImagePaths.length + lewdImagePaths.length
+        }`,
+        true
+      )
+      .addField("Songs", `General  - ${songsPaths.length}`, true)
+      .setFooter(
+        `There are ${admins.length} admin${admins.length === 1 ? "" : "s"}`
+      );
+    message.channel.send(exampleEmbed);
     //! JOIN COMMAND
   } else if (command === "?join") {
     if (message.member?.voice.channel) {

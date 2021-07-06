@@ -1,3 +1,6 @@
+/*
+    !Start of Config
+*/
 // Wait time in minutes
 export const admins = ["193313733471240192", "393715579879686147"];
 // Folders for anime
@@ -9,7 +12,7 @@ let lewdFolderRaw = "/home/artur/GoogleDrive/Images/Lewd";
 // Folders for songs
 let songFoldersRaw = "/home/artur/GoogleDrive/DriveSyncFiles/Music";
 /*
-!    End of Config
+    !End of Config
 */
 import fs from "fs";
 function traverseFolders(path: string, extension = "") {
