@@ -77,6 +77,13 @@ export const CONFIG: Bot.Config = {
       description: "Shows the term of service.",
     },
     donateLink: { command: "donate", description: "Allows for link donation." },
+    refreshFileCache: {
+      command: "refresh-cache",
+      description: "Check for new image/music",
+    },
+  },
+  commandOptions: {
+    cacheWaitTime: 1800, // In seconds
   },
   // You can alter messages (<name> will be replaced with dynamic values)
   templateMessages: {
@@ -87,6 +94,9 @@ export const CONFIG: Bot.Config = {
     songInvalidParam: "You have inputted an invalid parameter.",
     songNotPlaying: "There is no song playing. Play music using <command>",
     currentSongPlaying: "The current song is <song>",
+    cacheRefreshFail:
+      "Cache can't be refreshed yet. Wait <time> or contact an admin.",
+    cacheRefreshSuccess: "Cache was refreshed. (<change> files)",
   },
   helpWindow: {
     color: "#0099ff",

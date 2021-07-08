@@ -38,6 +38,7 @@ export namespace Bot {
       stats: Command;
       termOfService: Command;
       donateLink: Command;
+      refreshFileCache: Command;
     };
     templateMessages: {
       imageInvalidParam: string;
@@ -47,6 +48,11 @@ export namespace Bot {
       songInvalidParam: string;
       songNotPlaying: string;
       currentSongPlaying: string;
+      cacheRefreshSuccess: string;
+      cacheRefreshFail: string;
+    };
+    commandOptions: {
+      cacheWaitTime: number;
     };
     helpWindow: {
       color: string;
@@ -74,5 +80,6 @@ export namespace Bot {
       [channel: string]: Channel | undefined;
     };
     startUpTime: number;
+    lastCacheRefresh: number;
   }
 }

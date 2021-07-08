@@ -1,5 +1,4 @@
-import { channel } from "diagnostic_channel";
-import { GuildEmoji, Message, MessageEmbed, RoleManager } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import { CONFIG } from "./config";
 import { Bot } from "./types";
 import {
@@ -14,6 +13,7 @@ var cache: Bot.Cache = {
   music: {},
   audioChannels: {},
   startUpTime: Date.now(),
+  lastCacheRefresh: Date.now(),
 };
 function playAudio(channelID: string) {
   var room = cache.audioChannels[channelID];
@@ -26,22 +26,39 @@ function playAudio(channelID: string) {
   dispatcher.on("start", () => {
     if (!room) return;
     room.song = music ? music.replace(room.rootPath, "") : "";
+    console.log(`\nSONG-PLAY: (${room.rootPath}) ${room.song} `);
   });
   dispatcher.on("finish", () => {
     playAudio(channelID);
   });
 }
 export function refreshFileCache() {
+  let startSize = 0;
+  CONFIG.images.forEach((item) => {
+    if (cache.images[item.command] === undefined) return;
+    startSize += cache.images[item.command].length;
+  });
+  CONFIG.music.forEach((item) => {
+    if (cache.music[item.category] === undefined) return;
+    startSize += cache.music[item.category].length;
+  });
+  let endSize = 0;
+  cache.lastCacheRefresh =
+    Date.now() + 1000 * CONFIG.commandOptions.cacheWaitTime; // Non-admin can refresh every 30min
   CONFIG.images.forEach((image) => {
-    cache["images"][image.command] = traverseFolders(image.path);
+    cache.images[image.command] = traverseFolders(image.path);
+    endSize += cache.images[image.command].length;
   });
   CONFIG.music.forEach((music) => {
-    cache["music"][music.category] = traverseFolders(music.path);
+    cache.music[music.category] = traverseFolders(music.path);
+    endSize += cache.music[music.category].length;
   });
+  return endSize - startSize;
 }
 export async function botMessageParse(message: Message) {
   if (!message.content.startsWith(CONFIG.commandSuffix)) return;
   const [COMMAND, ...PARAMS] = message.content.substring(1).split(" ");
+  console.log(`\n(${message.author.username}: ${COMMAND} ${PARAMS}) `);
   // Check each image commands
   CONFIG.images.forEach((image) => {
     if (image.command !== COMMAND) return; // Skip if not the command
@@ -60,6 +77,7 @@ export async function botMessageParse(message: Message) {
     if (!isUserWait(message.author.id, image.command)) {
       var file = randomFile(cache["images"][image.command], search);
       if (file) {
+        console.log(`^^^^^^^^^: ${file} `);
         (image.directMessage ? message.author : message.channel).send(
           CONFIG.templateMessages.imageSendSource.replace(
             "<file>",
@@ -200,6 +218,7 @@ export async function botMessageParse(message: Message) {
         CONFIG.actionCommands.stats,
         CONFIG.actionCommands.termOfService,
         CONFIG.actionCommands.donateLink,
+        CONFIG.actionCommands.refreshFileCache,
       ].forEach((entity) => {
         generalCommands +=
           CONFIG.helpWindow.generalCommandSyntax
@@ -262,5 +281,26 @@ export async function botMessageParse(message: Message) {
     case CONFIG.actionCommands.donateLink.command:
       message.channel.send(`Link Donations are currently unavailable.`);
       break;
+    case CONFIG.actionCommands.refreshFileCache.command:
+      if (
+        cache.lastCacheRefresh < Date.now() ||
+        CONFIG.admins.includes(message.author.id)
+      ) {
+        let change = refreshFileCache();
+        message.channel.send(
+          CONFIG.templateMessages.cacheRefreshSuccess.replace(
+            "<change>",
+            (change >= 0 ? "+" : "") + change.toString()
+          )
+        );
+      } else {
+        let wait = Math.floor((cache.lastCacheRefresh - Date.now()) / 1000);
+        message.channel.send(
+          CONFIG.templateMessages.cacheRefreshFail.replace(
+            "<time>",
+            `${Math.floor(wait / 60)}min`
+          )
+        );
+      }
   }
 }
