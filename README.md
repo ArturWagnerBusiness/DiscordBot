@@ -7,7 +7,7 @@ You can run `npm install` to install the needed dependencies such as `discord.js
 To run the script a discord token needs to be inserted for the bot. This can be done in a file in the root called `token.js`<br/>
 
 ```
-module.exports = "<TOKEN>";
+export const TOKEN = "<TOKEN>";
 ```
 
 Paths to images and songs should be changed in the `config.ts`<br/>

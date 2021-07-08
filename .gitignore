@@ -1,13 +1,15 @@
 # Discord token
 token.js
+token.ts
 
 # VSCode config
 .vscode
 
 # Compiled js files from ts
-config.js
-index.js
-util.js
+*.js
+
+# Personal config
+config.ts
 
 # Logs
 donate.txt

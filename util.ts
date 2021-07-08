@@ -1,41 +1,25 @@
-import { admins } from "./config";
 import fs from "fs";
+import { CONFIG } from "./config";
 var waitingAuthors: {
   [key: string]: {
     [key: string]: number;
   };
 } = {};
-export function generatePath(pathRaw: string, root: string) {
-  let path = pathRaw.split("/").reverse();
-  let out = "";
-  let stop = false;
-  path.forEach((element) => {
-    if (stop) return;
-    if (element === root) {
-      stop = true;
-      return;
+export function traverseFolders(path: string, extension = "") {
+  let files: string[] = [];
+  fs.readdirSync(path).forEach((entity) => {
+    let entityStats = fs.lstatSync(`${path}/${entity}`);
+    if (entityStats.isFile() && entity.endsWith(extension)) {
+      files.push(`${path}/${entity}`);
+    } else if (entityStats.isDirectory()) {
+      files.push(...traverseFolders(`${path}/${entity}`));
     }
-    out = "/" + element + out;
   });
-  return out;
+  return files;
 }
-export function randomFile(
-  array: string[],
-  type: "png" | "gif" | "mp4" | "all"
-) {
-  if (type === "all") return array[Math.floor(Math.random() * array.length)];
-
-  var checkExtension = ["/"];
-  switch (type) {
-    case "png":
-      checkExtension = ["png", "jpg", "jpeg"];
-      break;
-    case "gif":
-      checkExtension = ["gif"];
-      break;
-    case "mp4":
-      checkExtension = ["mov", "mp4", "avi"];
-      break;
+export function randomFile(array: string[], checkExtension: string[]) {
+  if (checkExtension.length === 0) {
+    return array[Math.floor(Math.random() * array.length)];
   }
   let newArray = array
     .map((file) => {
@@ -54,28 +38,33 @@ export function randomFile(
   let file = newArray[Math.floor(Math.random() * newArray.length)];
   return file ? file : undefined;
 }
-export function checkUser(
+export function isUserWait(authorId: string, waitEvent: string) {
+  if (CONFIG.admins.includes(authorId)) return false;
+
+  if (
+    waitingAuthors[authorId] === undefined ||
+    waitingAuthors[authorId][waitEvent] === undefined ||
+    waitingAuthors[authorId][waitEvent] <= Date.now()
+  ) {
+    return false;
+  }
+  return true;
+}
+export function setUserWait(
   authorId: string,
   expectedWait: number,
   waitEvent: string
 ) {
-  if (admins.includes(authorId)) {
-    return true;
-  }
   if (waitingAuthors[authorId] === undefined) {
-    waitingAuthors[authorId] = {
-      [waitEvent]: Date.now() + expectedWait * 60000,
-    };
-
-    return true;
-  } else if (waitingAuthors[authorId][waitEvent] > Date.now()) {
-    return false;
-  } else {
-    waitingAuthors[authorId][waitEvent] = Date.now() + expectedWait * 60000;
-    return true;
+    waitingAuthors[authorId] = {};
   }
+  waitingAuthors[authorId][waitEvent] = Date.now() + expectedWait * 1000;
 }
-export function getWaitTime(authorId: string, waitEvent: string) {
+export function getUserWaitText(authorId: string, waitEvent: string) {
+  if (!waitingAuthors[authorId] || !waitingAuthors[authorId][waitEvent]) {
+    console.log("ERROR: Read wait time for no existing user!");
+    return "0s";
+  }
   let wait = Math.floor(
     (waitingAuthors[authorId][waitEvent] - Date.now()) / 60000
   );
