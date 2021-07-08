@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ArturWagnerBusiness/DiscordImageBot.git"
+    "url": "git+https://github.com/ArturWagnerBusiness/DiscordBot.git"
   },
   "author": "Artur Wagner",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ArturWagnerBusiness/DiscordImageBot/issues"
+    "url": "https://github.com/ArturWagnerBusiness/DiscordBot/issues"
   },
-  "homepage": "https://github.com/ArturWagnerBusiness/DiscordImageBot#readme",
+  "homepage": "https://github.com/ArturWagnerBusiness/DiscordBot#readme",
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "discord.js": "^12.5.3"
