@@ -50,6 +50,8 @@ export namespace Bot {
       currentSongPlaying: string;
       cacheRefreshSuccess: string;
       cacheRefreshFail: string;
+      donateLinkSuccess: string;
+      donateLinkFail: string;
     };
     commandOptions: {
       cacheWaitTime: number;

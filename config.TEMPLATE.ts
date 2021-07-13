@@ -97,6 +97,8 @@ export const CONFIG: Bot.Config = {
     cacheRefreshFail:
       "Cache can't be refreshed yet. Wait <time> or contact an admin.",
     cacheRefreshSuccess: "Cache was refreshed. (<change> files)",
+    donateLinkSuccess: "Link submitted. Thank you.",
+    donateLinkFail: "Please specify a link/data.",
   },
   helpWindow: {
     color: "#0099ff",

@@ -5,6 +5,7 @@ import {
   getUserWaitText,
   isUserWait,
   randomFile,
+  saveData,
   setUserWait,
   traverseFolders,
 } from "./util";
@@ -26,7 +27,9 @@ function playAudio(channelID: string) {
   dispatcher.on("start", () => {
     if (!room) return;
     room.song = music ? music.replace(room.rootPath, "") : "";
-    console.log(`\nSONG-PLAY: (${room.rootPath}) ${room.song} `);
+    let timeNow = new Date().toLocaleTimeString();
+    console.log(`[${timeNow}] Playing: ${room.rootPath}${room.song}`);
+    saveData("log.txt", `[${timeNow}] Playing: ${room.rootPath}${room.song}`);
   });
   dispatcher.on("finish", () => {
     playAudio(channelID);
@@ -58,7 +61,18 @@ export function refreshFileCache() {
 export async function botMessageParse(message: Message) {
   if (!message.content.startsWith(CONFIG.commandSuffix)) return;
   const [COMMAND, ...PARAMS] = message.content.substring(1).split(" ");
-  console.log(`\n(${message.author.username}: ${COMMAND} ${PARAMS}) `);
+  let timeNow = new Date().toLocaleTimeString();
+  console.log(
+    `[${timeNow}] Command ${message.author.username}: ${COMMAND} ${PARAMS.join(
+      " "
+    )}`
+  );
+  saveData(
+    "log.txt",
+    `[${timeNow}] Command ${message.author.username}: ${COMMAND} ${PARAMS.join(
+      " "
+    )}`
+  );
   // Check each image commands
   CONFIG.images.forEach((image) => {
     if (image.command !== COMMAND) return; // Skip if not the command
@@ -77,7 +91,9 @@ export async function botMessageParse(message: Message) {
     if (!isUserWait(message.author.id, image.command)) {
       var file = randomFile(cache["images"][image.command], search);
       if (file) {
-        console.log(`^^^^^^^^^: ${file} `);
+        let timeNow = new Date().toLocaleTimeString();
+        console.log(`[${timeNow}]       ^: ${file} `);
+        saveData("log.txt", `[${timeNow}]       ^: ${file} `);
         (image.directMessage ? message.author : message.channel).send(
           CONFIG.templateMessages.imageSendSource.replace(
             "<file>",
@@ -111,7 +127,7 @@ export async function botMessageParse(message: Message) {
       );
     }
     if (image.cleanupMessage) {
-      message.delete(); // Try to delete.
+      message.delete().catch(() => {}); // Try to delete.
     }
   });
   switch (COMMAND) {
@@ -195,6 +211,16 @@ export async function botMessageParse(message: Message) {
             .replace("<command>", CONFIG.commandSuffix + image.command)
             .replace("<description>", image.description) + "\n";
       });
+      let imageFilters = "";
+      CONFIG.imageFilters?.forEach((image) => {
+        imageFilters += image.name + " ";
+      });
+      if (imageFilters !== "") {
+        imageCommands +=
+          CONFIG.helpWindow.imageCommandSyntax
+            .replace("<command>", "Parameters")
+            .replace("<description>", imageFilters) + "\n";
+      }
       let musicCommands = "";
       [
         CONFIG.actionCommands.joinChannel,
@@ -279,7 +305,15 @@ export async function botMessageParse(message: Message) {
       );
       break;
     case CONFIG.actionCommands.donateLink.command:
-      message.channel.send(`Link Donations are currently unavailable.`);
+      if (PARAMS[0] !== undefined) {
+        saveData(
+          "donate.txt",
+          `${message.author.username}: ${PARAMS.join(" ")}`
+        );
+        message.channel.send(CONFIG.templateMessages.donateLinkSuccess);
+      } else {
+        message.channel.send(CONFIG.templateMessages.donateLinkFail);
+      }
       break;
     case CONFIG.actionCommands.refreshFileCache.command:
       if (
